@@ -1,11 +1,10 @@
 import express from "express"
 import dotenv from "dotenv"
 import cors from "cors"
-import { ConectarMongoDb } from "./conectarMongoDb"
 import Upload from "./model"
+import mongoose from "mongoose"
 
 dotenv.config()
-ConectarMongoDb()
 const app = express()
 
 app.use(express.json())
@@ -42,6 +41,17 @@ app.post("/", async (req, res) => {
   }
 })
 
+const start = async () => {
+  try {
+    await mongoose.connect("mongodb://localhost:27017")
+    console.log("MongoDB conectado!")
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 app.listen(port, () => {
-  console.log(`listening on ${port}`)
+  console.log(`listening on port: ${port}`)
 })
+
+start()
