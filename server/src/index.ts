@@ -1,8 +1,11 @@
 import express from "express"
+import "express-async-errors"
+
 import dotenv from "dotenv"
 import cors from "cors"
-import Upload from "./model"
 import mongoose from "mongoose"
+import { errorHandler } from "./middlewares/errorHandler"
+import { NotFoundError } from "./errors/notFoundError"
 
 dotenv.config()
 const app = express()
@@ -10,36 +13,6 @@ const app = express()
 app.use(express.json())
 app.use(cors({ origin: `${process.env.SERVER_URL}` }))
 const port = process.env.PORT || 5000
-
-app.get("/", async (req, res) => {
-  res.send("hi there!")
-})
-
-app.get("/todas", async (req, res) => {
-  try {
-    const image = await Upload.find({})
-    res.status(200).json(image)
-  } catch (err) {
-    res.status(404).json({ mensagem: "Data error" })
-  }
-})
-
-app.post("/", async (req, res) => {
-  try {
-    const { image, title } = req.body
-    const createImage = {
-      image,
-      title,
-    }
-
-    if (createImage) {
-      const newImage = await Upload.create(createImage)
-      res.status(404).json(newImage)
-    }
-  } catch (err) {
-    res.status(404).json({ mensagem: "invalid data" })
-  }
-})
 
 const start = async () => {
   try {
@@ -49,6 +22,12 @@ const start = async () => {
     console.error(err)
   }
 }
+
+app.all("*", async (req, res) => {
+  throw new NotFoundError()
+})
+
+app.use(errorHandler)
 
 app.listen(port, () => {
   console.log(`listening on port: ${port}`)
